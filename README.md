@@ -36,5 +36,5 @@
 1. 如果有其他问题可以进群询问
 
 [010]: https://www.google.com/chrome/browser/desktop/index.html
-[011]: https://codeload.github.com/lizhengqiang/wkh/zip/master
+[011]: https://codeload.github.com/LFZJun/wkh/zip/master
 [012]: chrome://extensions/
