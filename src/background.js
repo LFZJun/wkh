@@ -166,7 +166,7 @@ chrome.webRequest.onCompleted.addListener(
         });
         return true;
     },
-    {urls: ["http://h.miguan.in/*"]}
+    {urls: ["http://api.h.miguan.in/*"]}
 );
 
 function sleep() {
