@@ -19,7 +19,8 @@
         "webRequest",
         "webRequestBlocking",
         "notifications",
-        "storage"
+        "storage",
+        "cookies"
     ],
     "content_scripts": [
         {

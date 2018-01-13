@@ -60,88 +60,19 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 109);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 109:
+/******/ ([
+/* 0 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__consts__ = __webpack_require__(23);
-
-
-const interval = 'interval';
-const mode = 'mode';
-const min = 'min';
-const kg = 'kg';
-const wallet = 'wallet';
-const to_address = 'to_address';
-const password = 'password';
-
-chrome.storage.sync.get({
-    [mode]: __WEBPACK_IMPORTED_MODULE_0__consts__["i" /* VALUE */],
-    [min]: 0.1,
-    [kg]: false,
-    [interval]: 5,
-    [wallet]: null,
-    [to_address]: null,
-    [password]: null,
-}, function (result) {
-    $("#mode").val(result.mode);
-    $("#min").val(result.min);
-    $("#kg").val(result.kg);
-    $("#interval").val(result.interval);
-    $("#wallet").val(result.wallet);
-    $("#to_address").val(result.to_address);
-    $("#password").val(result.password);
-});
-
-const DoUpdate = () => {
-    console.log("update");
-    chrome.storage.sync.set({
-        [interval]: $('#interval').val(),
-        [mode]: $("#mode").val(),
-        [min]: $("#min").val(),
-        [kg]: $("#kg").val(),
-        [wallet]: $("#wallet").val(),
-        [to_address]: $("#to_address").val(),
-        [password]: $("#password").val(),
-    }, function (result) {
-        console.log(result)
-    })
-};
-
-$("input").change(DoUpdate);
-$("#update").click(DoUpdate);
-$("#like").click(function () {
-    DoUpdate();
-    chrome.runtime.sendMessage({
-        path: __WEBPACK_IMPORTED_MODULE_0__consts__["f" /* REWARD */]
-    }, function (response) {
-        console.log(response);
-    });
-});
-
-/***/ }),
-
-/***/ 23:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const QUICK = "quick";
-/* harmony export (immutable) */ __webpack_exports__["e"] = QUICK;
-
-const SLOW = "slow";
-/* harmony export (immutable) */ __webpack_exports__["g"] = SLOW;
-
 const FULL = "full";
 /* harmony export (immutable) */ __webpack_exports__["b"] = FULL;
 
 const VALUE = "value";
-/* harmony export (immutable) */ __webpack_exports__["i"] = VALUE;
+/* harmony export (immutable) */ __webpack_exports__["f"] = VALUE;
 
 const HOME = "/inject/home";
 /* harmony export (immutable) */ __webpack_exports__["c"] = HOME;
@@ -153,13 +84,59 @@ const ALERT = "/inject/alert";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ALERT;
 
 const TRANSACTION = "/background/transaction";
-/* harmony export (immutable) */ __webpack_exports__["h"] = TRANSACTION;
-
-const REWARD = "/background/reward";
-/* harmony export (immutable) */ __webpack_exports__["f"] = REWARD;
+/* harmony export (immutable) */ __webpack_exports__["e"] = TRANSACTION;
 
 
+
+/***/ }),
+/* 1 */,
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__consts__ = __webpack_require__(0);
+
+
+const interval = 'interval';
+const mode = 'mode';
+const min = 'min';
+const kg = 'kg';
+const wallet = 'wallet';
+const coin = 'coin';
+
+chrome.storage.sync.get({
+    [mode]: __WEBPACK_IMPORTED_MODULE_0__consts__["f" /* VALUE */],
+    [min]: 0.1,
+    [kg]: false,
+    [interval]: 5,
+    [wallet]: null,
+    [coin]: 0.1
+}, function (result) {
+    $("#mode").val(result.mode);
+    $("#min").val(result.min);
+    $("#kg").val(result.kg);
+    $("#interval").val(result.interval);
+    $("#wallet").val(result.wallet);
+    $('#coin').val(result.coin);
+});
+
+const DoUpdate = () => {
+    console.log("update");
+    chrome.storage.sync.set({
+        [interval]: $('#interval').val(),
+        [mode]: $("#mode").val(),
+        [min]: $("#min").val(),
+        [kg]: $("#kg").val(),
+        [wallet]: $("#wallet").val(),
+        [coin]: $("#coin").val()
+    }, function (result) {
+        console.log(result)
+    })
+};
+
+$("input").change(DoUpdate);
+$("#update").click(DoUpdate);
 
 /***/ })
-
-/******/ });
+/******/ ]);

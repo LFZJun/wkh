@@ -1,12 +1,11 @@
-import { VALUE, REWARD } from "./consts";
+import { VALUE } from "./consts";
 
 const interval = 'interval';
 const mode = 'mode';
 const min = 'min';
 const kg = 'kg';
 const wallet = 'wallet';
-const to_address = 'to_address';
-const password = 'password';
+const coin = 'coin';
 
 chrome.storage.sync.get({
     [mode]: VALUE,
@@ -14,16 +13,14 @@ chrome.storage.sync.get({
     [kg]: false,
     [interval]: 5,
     [wallet]: null,
-    [to_address]: null,
-    [password]: null,
+    [coin]: 0.1
 }, function (result) {
     $("#mode").val(result.mode);
     $("#min").val(result.min);
     $("#kg").val(result.kg);
     $("#interval").val(result.interval);
     $("#wallet").val(result.wallet);
-    $("#to_address").val(result.to_address);
-    $("#password").val(result.password);
+    $('#coin').val(result.coin);
 });
 
 const DoUpdate = () => {
@@ -34,8 +31,7 @@ const DoUpdate = () => {
         [min]: $("#min").val(),
         [kg]: $("#kg").val(),
         [wallet]: $("#wallet").val(),
-        [to_address]: $("#to_address").val(),
-        [password]: $("#password").val(),
+        [coin]: $("#coin").val()
     }, function (result) {
         console.log(result)
     })
@@ -43,11 +39,3 @@ const DoUpdate = () => {
 
 $("input").change(DoUpdate);
 $("#update").click(DoUpdate);
-$("#like").click(function () {
-    DoUpdate();
-    chrome.runtime.sendMessage({
-        path: REWARD
-    }, function (response) {
-        console.log(response);
-    });
-});

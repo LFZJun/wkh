@@ -1,120 +1,31 @@
-import Web3 from "web3";
-import Transaction from "ethereumjs-tx";
-import Wallet from "ethereumjs-wallet";
-import { FULL, QUICK, SLOW, VALUE, HOME, TRANSACTION, MARKET, REWARD, ALERT } from "./consts";
-import { SingleTransaction } from "./entity/transction";
+import { FULL, VALUE, HOME, TRANSACTION, MARKET, ALERT } from "./consts";
+import { FeedingCenter } from "./feed";
 import { Router } from "./router";
-import { bestFeeding, whiteList } from "./utils";
+import { whiteList } from "./utils";
 
 console.log("background");
 
-const web3 = new Web3();
-const transactions = [];
+const feedingCenter = new FeedingCenter();
 const router = new Router();
 
 router.handle(TRANSACTION, ctx => {
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get({
-            "to_address": null,
-            "password": null,
             "wallet": null,
+            "coin": null
         }, function (result) {
-            const wallet = Wallet.fromV3(result.wallet, result.password);
-            const {to_address} = result;
             let {request} = ctx;
-            const {mode, limit, id} = request;
-            let num = limit.toFixed(0);
-            const idNumStr = `0.${id}`;
-            const idNum = Number(idNumStr);
-            if (idNum > limit) {
-                resolve();
-                return
-            }
-            if (mode === QUICK) {
-                if (num + idNum > limit) {
-                    num = num - 1 + idNum
-                } else {
-                    num = num + idNum
-                }
-                const loop = async function () {
-                    try {
-                        const firstTransaction = await PushTransaction(wallet, to_address, `${num | 0}.${idNumStr.slice(2)}`);
-                        console.log(firstTransaction);
-
-                        console.log(`ID: ${id} 需要喂养${limit} 共${((limit - num) / idNum).toFixed(0)}次`);
-                        for (let i = num + idNum; i < limit; i += idNum) {
-                            try {
-                                const transaction = await PushTransaction(wallet, to_address, idNumStr);
-                                console.log(transaction)
-                            } catch (err) {
-                                throw err
-                            }
-                        }
-                    } catch (err) {
-                        throw err
-                    }
-                };
-                loop().then(() => {
-                    resolve();
-                }, (err) => {
-                    reject(err);
-                });
-            } else if (mode === FULL) {
-                let c = bestFeeding(limit, idNum)[0];
-                console.log(`ID:${id} 需要喂养${limit} 共${c.list.length}次`);
-                const loop = async function () {
-                    for (let i of c.list) {
-                        try {
-                            console.log(i);
-                            const transaction = await PushTransaction(wallet, to_address, i);
-                            console.log(transaction)
-                        } catch (err) {
-                            throw err
-                        }
-                    }
-                };
-                loop().then(() => {
-                    resolve();
-                }, (err) => {
-                    reject(err)
-                })
-            } else if (mode === SLOW) {
-                let times = (limit / idNum) | 0;
-                console.log(`ID: ${id} 需要喂养${limit} 共${times}次`);
-                const loop = async function () {
-                    for (let i = 0; i < times; i++) {
-                        try {
-                            console.log(idNum);
-                            const Transaction = await PushTransaction(wallet, to_address, idNumStr);
-                            console.log(Transaction)
-                        } catch (err) {
-                            throw err
-                        }
-                    }
-                };
-                loop().then(() => {
-                    resolve();
-                }, (err) => {
-                    reject(err)
-                })
-            }
-            else {
+            const {mode, feeding, limit, id} = request;
+            const {coin} = result;
+            if (mode === FULL) {
+                console.log(`需要喂养${feedingCenter.fullyFeeds(id, feeding, limit, coin)}次`);
+                console.log(feedingCenter);
+            } else {
                 resolve()
             }
         })
     });
 });
-
-router.handle(REWARD, ctx => {
-        return new Promise((resolve, reject) => {
-            PushTransaction(wallet, "0x1889aea32bebda482440393d470246561a4e6ca6", "0.5")
-                .then(() => {
-                    console.log("准备打赏");
-                    resolve();
-                });
-        });
-    }
-);
 
 router.run();
 
@@ -123,14 +34,13 @@ router.run();
  */
 chrome.webRequest.onCompleted.addListener(
     function (details) {
-        console.log(details);
         chrome.tabs.query({active: true}, function (tabs) {
-            console.log(tabs);
             chrome.storage.sync.get({
                 "mode": VALUE,
                 "min": 0.1,
                 "kg": false,
                 "wallet": null,
+                "coin": 0
             }, function (result) {
                 const tab = tabs[0];
                 let path = null;
@@ -138,6 +48,13 @@ chrome.webRequest.onCompleted.addListener(
                     chrome.tabs.sendMessage(tab.id, {
                         path: ALERT,
                         alert: "需要配置钱包文件"
+                    });
+                    return
+                }
+                if (result.coin === 0) {
+                    chrome.tabs.sendMessage(tab.id, {
+                        path: ALERT,
+                        alert: "请填写单次玩客币数量"
                     });
                     return
                 }
@@ -166,8 +83,34 @@ chrome.webRequest.onCompleted.addListener(
         });
         return true;
     },
-    {urls: ["http://api.h.miguan.in/*"]}
+    {urls: ["http://*.miguan.in/*"]}
 );
+
+
+const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
+let globalMonkeyID = "";
+chrome.webRequest.onBeforeSendHeaders.addListener(details => {
+    let count = 0;
+    for (let n in details.requestHeaders) {
+        const name = details.requestHeaders[n].name;
+        if (name === "Origin") {
+            details.requestHeaders[n].value = "http://h.miguan.in";
+        } else if (name === "accessToken") {
+            count++;
+        } else if (name === "Access-Control-Request-Method") {
+            count++;
+        }
+    }
+    if (count === 0) {
+        details.requestHeaders.push({name: "Referer", value: `http://h.miguan.in/monkey/${globalMonkeyID}`});
+    } else if (count === 1) {
+        details.requestHeaders.push({name: "Access-Control-Request-Headers", value: "accesstoken,x-requested-with"});
+        details.requestHeaders.push({name: "Access-Control-Request-Method", value: "POST"});
+        details.requestHeaders.push({name: "Referer", value: "http://h.miguan.in/monkey/"})
+    }
+    return {requestHeaders: details.requestHeaders};
+}, {urls: [FeedingUrl]}, ["blocking", "requestHeaders"]);
+
 
 function sleep() {
     return new Promise(resolve => {
@@ -180,86 +123,52 @@ function sleep() {
     })
 }
 
-const TransactionLoop = async function () {
-    console.log("TransactionLoop", "begin");
+const TransactionLoop = async () => {
+    console.log("TransactionLoop begin");
     while (true) {
-        await sleep();
-        const tx = transactions.shift();
-        if (tx === undefined) {
-            console.log("TransactionLoop", "idle");
-            continue
+        let feedings = feedingCenter.back();
+        if (feedings === undefined) {
+            await sleep();
+            console.log("TransactionLoop idle");
+            continue;
         }
-        try {
-            const resp = await SendTransaction(tx.wallet, tx.to, tx.num);
-            tx.onSuccess(resp)
-        } catch (err) {
-            tx.onError(err)
+        let feeding = feedings.shift();
+        while (feeding !== undefined) {
+            let coin = feeding.coin;
+            let monkeyID = feedings.monkeyID;
+            $.ajax({
+                type: 'OPTIONS',
+                url: FeedingUrl,
+                success: (data) => {
+                    console.log(data);
+                    chrome.cookies.get({url: "http://api.h.miguan.in", name: "token"}, (cookie => {
+                        console.log(`开始喂养 ${monkeyID} ${coin}`);
+                        globalMonkeyID = monkeyID;
+                        $.ajax({
+                            type: 'POST',
+                            url: FeedingUrl,
+                            data: {
+                                coin: coin,
+                                monkeyId: monkeyID
+                            },
+                            headers: {
+                                Accept: "application/json, text/plain, */*",
+                                accessToken: `${cookie.value}`,
+                            },
+                            success: function (data) {
+                                console.log(data);
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        });
+                    }));
+                }
+            });
+            await sleep();
+            feeding = feedings.shift();
         }
     }
 };
 
-const SendTransaction = function (wallet, to, num) {
-    return new Promise((rs, rj) => {
-        const from = `0x${wallet.getAddress().toString('hex')}`;
-        console.log("from", from);
-        $.ajax({
-            type: 'POST',
-            url: "https://walletapi.onethingpcs.com/",
-            data: JSON.stringify({
-                "jsonrpc": "2.0",
-                "method": "eth_getTransactionCount",
-                "params": [from, "pending"],
-                "id": 1
-            }),
-            contentType: 'application/json',
-            success: function (transactionCount) {
-                let txParams = {
-                    from: from,
-                    to: to,
-                    value: web3.utils.toHex(web3.utils.toWei(num, 'ether')),
-                    gasLimit: '0x186a0',
-                    gasPrice: '0x174876e800',
-                    nonce: transactionCount.result,
-                };
-                let tx = new Transaction(txParams);
-                tx.sign(wallet.getPrivateKey());
-
-                const serializedTx = tx.serialize();
-                const raw = `0x${serializedTx.toString('hex')}`;
-                $.ajax({
-                    type: 'POST',
-                    url: "https://walletapi.onethingpcs.com/",
-                    data: JSON.stringify({
-                        "jsonrpc": "2.0",
-                        "method": "eth_sendRawTransaction",
-                        "params": [raw],
-                        "id": 1
-                    }),
-                    contentType: 'application/json',
-                    success: function (transaction) {
-                        rs(transaction)
-                    },
-                    error: function (xhr, type) {
-                        rj('eth_sendRawTransaction error!')
-                    }
-                })
-            },
-            error: function (xhr, type) {
-                rj('eth_getTransactionCount error!')
-            }
-        })
-    })
-};
-
-const PushTransaction = function (wallet, to, num) {
-    return new Promise((rs, rj) => {
-        transactions.push(
-            new SingleTransaction(wallet, to, num, msg => {
-                rs(msg)
-            }, err => {
-                rj(err)
-            }))
-    })
-};
-
-setTimeout(TransactionLoop);
+setTimeout(TransactionLoop, 0);
