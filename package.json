@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@types/chrome": "^0.0.57",
-    "@types/zepto": "^1.0.29"
+    "@types/zepto": "^1.0.29",
+    "axios": "^0.17.1"
   }
 }

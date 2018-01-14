@@ -60,11 +60,12 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 1:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -89,125 +90,14 @@ const TRANSACTION = "/background/transaction";
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-function Next(ctx) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let handlers = ctx.handlers;
-        let n = ctx.handlerIndex(-1) + 1;
-        if (n < handlers.length) {
-            ctx.handlerIndex(n);
-            try {
-                yield handlers[n](ctx);
-            }
-            catch (err) {
-                throw err;
-            }
-        }
-    });
-}
-class Context {
-    constructor(handlers = [], values = {}, currentHandlerIndex = 0) {
-        this.handlers = handlers;
-        this.values = values;
-        this.currentHandlerIndex = currentHandlerIndex;
-    }
-    next() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield Next(this);
-            }
-            catch (err) {
-                throw err;
-            }
-        });
-    }
-    handlerIndex(n) {
-        if (n < 0 || n > this.handlers.length - 1) {
-            return this.currentHandlerIndex;
-        }
-        return this.currentHandlerIndex = n;
-    }
-}
-/* unused harmony export Context */
-
-class Route {
-    constructor(handlers = []) {
-        this.handlers = handlers;
-    }
-    join(...handlers) {
-        this.handlers.push(...handlers);
-    }
-}
-/* unused harmony export Route */
-
-class Router {
-    constructor(middleware = [], routes = {}) {
-        this.middleware = middleware;
-        this.routes = routes;
-    }
-    use(...handlers) {
-        this.middleware.push(...handlers);
-    }
-    handle(key, ...handlers) {
-        if (this.routes[key] == null) {
-            this.routes[key] = new Route([...handlers]);
-        }
-        this.routes[key].join(...handlers);
-    }
-    serve(key, ctx) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let route = this.routes[key];
-            if (route == null) {
-                return;
-            }
-            ctx.handlers = [...this.middleware, ...route.handlers];
-            try {
-                yield Next(ctx);
-            }
-            catch (err) {
-                throw err;
-            }
-        });
-    }
-    run() {
-        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-            let context = new Context();
-            context.request = request;
-            context.sender = sender;
-            context.response = {};
-            this.serve(request.path, context).catch(function (err) {
-                sendResponse(context.response);
-                throw err;
-            }).then(function () {
-                sendResponse(context.response);
-            });
-        });
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Router;
-
-
-
-/***/ }),
-/* 2 */,
-/* 3 */
+/***/ 12:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router_ts__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__consts_ts__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router_ts__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__consts_ts__ = __webpack_require__(1);
 
 
 
@@ -371,5 +261,118 @@ const GenerationFactor = (() => {
     }
 })();
 
+/***/ }),
+
+/***/ 2:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+function Next(ctx) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let handlers = ctx.handlers;
+        let n = ctx.handlerIndex(-1) + 1;
+        if (n < handlers.length) {
+            ctx.handlerIndex(n);
+            try {
+                yield handlers[n](ctx);
+            }
+            catch (err) {
+                throw err;
+            }
+        }
+    });
+}
+class Context {
+    constructor(handlers = [], values = {}, currentHandlerIndex = 0) {
+        this.handlers = handlers;
+        this.values = values;
+        this.currentHandlerIndex = currentHandlerIndex;
+    }
+    next() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield Next(this);
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    handlerIndex(n) {
+        if (n < 0 || n > this.handlers.length - 1) {
+            return this.currentHandlerIndex;
+        }
+        return this.currentHandlerIndex = n;
+    }
+}
+/* unused harmony export Context */
+
+class Route {
+    constructor(handlers = []) {
+        this.handlers = handlers;
+    }
+    join(...handlers) {
+        this.handlers.push(...handlers);
+    }
+}
+/* unused harmony export Route */
+
+class Router {
+    constructor(middleware = [], routes = {}) {
+        this.middleware = middleware;
+        this.routes = routes;
+    }
+    use(...handlers) {
+        this.middleware.push(...handlers);
+    }
+    handle(key, ...handlers) {
+        if (this.routes[key] == null) {
+            this.routes[key] = new Route([...handlers]);
+        }
+        this.routes[key].join(...handlers);
+    }
+    serve(key, ctx) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let route = this.routes[key];
+            if (route == null) {
+                return;
+            }
+            ctx.handlers = [...this.middleware, ...route.handlers];
+            try {
+                yield Next(ctx);
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    run() {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            let context = new Context();
+            context.request = request;
+            context.sender = sender;
+            context.response = {};
+            this.serve(request.path, context).catch(function (err) {
+                sendResponse(context.response);
+                throw err;
+            }).then(function () {
+                sendResponse(context.response);
+            });
+        });
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Router;
+
+
+
 /***/ })
-/******/ ]);
+
+/******/ });

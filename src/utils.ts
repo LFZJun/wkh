@@ -1,3 +1,6 @@
+import Axios, {AxiosPromise} from "axios";
+import Cookie = chrome.cookies.Cookie;
+
 class Combination {
     list: string[];
     sum: number;
@@ -43,10 +46,28 @@ export function bestFeeding(limit: number, base: number): Combination[] {
     return cs;
 }
 
-export function whiteList() {
-    return new Promise((rs, rj) => {
-        $.getJSON("http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json", function (resp) {
-            rs(resp)
-        })
+export function sleep(): Promise<void> {
+    return new Promise(resolve => {
+        chrome.storage.sync.get({
+            "interval": 5,
+        }, (result) => {
+            const interval = result.interval < 1 ? 1000 : result.interval * 1000;
+            setTimeout(resolve, interval)
+        });
     })
+}
+
+export function whiteList(): AxiosPromise<any> {
+    return Axios({
+        url: "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
+        method: 'get'
+    });
+}
+
+export function getToken(): Promise<string | null> {
+    return new Promise(resolve => {
+        chrome.cookies.get({url: "http://api.h.miguan.in", name: "token"}, (cookie => {
+            resolve(cookie === null ? null : cookie.value);
+        }));
+    });
 }

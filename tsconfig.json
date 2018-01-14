@@ -3,7 +3,8 @@
     "allowJs": true,
     "target": "es6",
     "sourceMap": true,
-    "inlineSources": true
+    "inlineSources": true,
+    "moduleResolution": "node"
   },
   "include": [
     "./src/**/*"

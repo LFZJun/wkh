@@ -60,11 +60,12 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 1:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -89,20 +90,19 @@ const TRANSACTION = "/background/transaction";
 
 
 /***/ }),
-/* 1 */,
-/* 2 */
+
+/***/ 11:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__consts__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__consts__ = __webpack_require__(1);
 
 
 const interval = 'interval';
 const mode = 'mode';
 const min = 'min';
 const kg = 'kg';
-const wallet = 'wallet';
 const coin = 'coin';
 
 chrome.storage.sync.get({
@@ -110,14 +110,12 @@ chrome.storage.sync.get({
     [min]: 0.1,
     [kg]: false,
     [interval]: 5,
-    [wallet]: null,
     [coin]: 0.1
 }, function (result) {
     $("#mode").val(result.mode);
     $("#min").val(result.min);
     $("#kg").val(result.kg);
     $("#interval").val(result.interval);
-    $("#wallet").val(result.wallet);
     $('#coin').val(result.coin);
 });
 
@@ -128,7 +126,6 @@ const DoUpdate = () => {
         [mode]: $("#mode").val(),
         [min]: $("#min").val(),
         [kg]: $("#kg").val(),
-        [wallet]: $("#wallet").val(),
         [coin]: $("#coin").val()
     }, function (result) {
         console.log(result)
@@ -139,4 +136,5 @@ $("input").change(DoUpdate);
 $("#update").click(DoUpdate);
 
 /***/ })
-/******/ ]);
+
+/******/ });

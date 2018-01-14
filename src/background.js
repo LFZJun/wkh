@@ -1,15 +1,20 @@
-import { FULL, VALUE, HOME, TRANSACTION, MARKET, ALERT } from "./consts";
+import Axios from "axios"
+import { ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE } from "./consts";
 import { FeedingCenter } from "./feed";
 import { Router } from "./router";
-import { whiteList } from "./utils";
+import { getToken, sleep } from "./utils";
 
 console.log("background");
 
 const feedingCenter = new FeedingCenter();
 const router = new Router();
+const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
+let globalMonkeyID = "";
+let login = false;
+let token = "";
 
 router.handle(TRANSACTION, ctx => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         chrome.storage.sync.get({
             "wallet": null,
             "coin": null
@@ -33,24 +38,26 @@ router.run();
  * 监听页面变化
  */
 chrome.webRequest.onCompleted.addListener(
-    function (details) {
+    function () {
+        if (!login) {
+            return
+        }
         chrome.tabs.query({active: true}, function (tabs) {
+            const tab = tabs[0];
+            let path = null;
+            if (tab.url === "http://h.miguan.in/home") {
+                path = HOME;
+            } else if (tab.url.indexOf("http://h.miguan.in/market") !== -1) {
+                path = MARKET;
+            } else {
+                return
+            }
             chrome.storage.sync.get({
                 "mode": VALUE,
                 "min": 0.1,
                 "kg": false,
-                "wallet": null,
                 "coin": 0
             }, function (result) {
-                const tab = tabs[0];
-                let path = null;
-                if (result.wallet === null || result.wallet === "") {
-                    chrome.tabs.sendMessage(tab.id, {
-                        path: ALERT,
-                        alert: "需要配置钱包文件"
-                    });
-                    return
-                }
                 if (result.coin === 0) {
                     chrome.tabs.sendMessage(tab.id, {
                         path: ALERT,
@@ -58,37 +65,78 @@ chrome.webRequest.onCompleted.addListener(
                     });
                     return
                 }
-                result.wallet = JSON.parse(result.wallet);
-                whiteList().then(roll => {
-                    if (roll.indexOf(`0x${result.wallet.address}`) === -1) {
-                        chrome.tabs.sendMessage(tab.id, {
-                            path: ALERT,
-                            alert: "需要加入白名单"
-                        });
-                        return
-                    }
-                    if (tab.url === "http://h.miguan.in/home") {
-                        path = HOME;
-                    } else if (tab.url.indexOf("http://h.miguan.in/market") !== -1) {
-                        path = MARKET;
-                    } else {
-                        return
-                    }
-                    result.path = path;
-                    chrome.tabs.sendMessage(tab.id, result, function (response) {
-                        console.log(response);
-                    });
+                // whiteList().then(response => {
+                // const roll = response.data;
+                // if (roll.indexOf(`0x${result.wallet.address}`) === -1) {
+                //     chrome.tabs.sendMessage(tab.id, {
+                //         path: ALERT,
+                //         alert: "需要加入白名单"
+                //     });
+                //     return
+                // }
+                result.path = path;
+                chrome.tabs.sendMessage(tab.id, result, function (response) {
+                    console.log(response);
                 });
+                // });
             })
         });
         return true;
     },
-    {urls: ["http://*.miguan.in/*"]}
+    {urls: ["http://api.h.miguan.in/*"]}
 );
 
+const TransactionLoop = async () => {
+    console.log("TransactionLoop begin");
+    while (true) {
+        let feedings = feedingCenter.back();
+        if (feedings === undefined) {
+            await sleep();
+            console.log("TransactionLoop idle");
+            continue;
+        }
+        let feeding = feedings.shift();
+        while (feeding !== undefined) {
+            let coin = feeding.coin;
+            let monkeyID = feedings.monkeyID;
+            Axios({
+                url: FeedingUrl,
+                method: 'options',
+            }).then(() => {
+                return getToken();
+            }).then((token) => {
+                return Axios({
+                    url: FeedingUrl,
+                    method: 'post',
+                    data: {
+                        coin: coin,
+                        monkeyId: monkeyID
+                    },
+                    headers: {
+                        'Accept': "application/json, text/plain, */*",
+                        'accessToken': token,
+                    },
+                });
+            }).then((response) => {
+                console.log(response)
+            });
+            await sleep();
+            feeding = feedings.shift();
+        }
+    }
+};
 
-const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
-let globalMonkeyID = "";
+chrome.webRequest.onBeforeSendHeaders.addListener(details => {
+    for (let n in details.requestHeaders) {
+        const name = details.requestHeaders[n].name;
+        if (name === "accessToken") {
+            token = details.requestHeaders[n].value;
+        }
+    }
+    console.log(details.requestHeaders);
+    return {requestHeaders: details.requestHeaders};
+}, {urls: ["http://api.h.miguan.in/*"]}, ["blocking", "requestHeaders"]);
+
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
     let count = 0;
     for (let n in details.requestHeaders) {
@@ -111,64 +159,11 @@ chrome.webRequest.onBeforeSendHeaders.addListener(details => {
     return {requestHeaders: details.requestHeaders};
 }, {urls: [FeedingUrl]}, ["blocking", "requestHeaders"]);
 
+// const LoginLoop = async () => {
+//
+// };
 
-function sleep() {
-    return new Promise(resolve => {
-        chrome.storage.sync.get({
-            "interval": 5,
-        }, function (result) {
-            const interval = result.interval < 1 ? 1000 : result.interval * 1000;
-            setTimeout(resolve, interval)
-        })
-    })
-}
-
-const TransactionLoop = async () => {
-    console.log("TransactionLoop begin");
-    while (true) {
-        let feedings = feedingCenter.back();
-        if (feedings === undefined) {
-            await sleep();
-            console.log("TransactionLoop idle");
-            continue;
-        }
-        let feeding = feedings.shift();
-        while (feeding !== undefined) {
-            let coin = feeding.coin;
-            let monkeyID = feedings.monkeyID;
-            $.ajax({
-                type: 'OPTIONS',
-                url: FeedingUrl,
-                success: (data) => {
-                    console.log(data);
-                    chrome.cookies.get({url: "http://api.h.miguan.in", name: "token"}, (cookie => {
-                        console.log(`开始喂养 ${monkeyID} ${coin}`);
-                        globalMonkeyID = monkeyID;
-                        $.ajax({
-                            type: 'POST',
-                            url: FeedingUrl,
-                            data: {
-                                coin: coin,
-                                monkeyId: monkeyID
-                            },
-                            headers: {
-                                Accept: "application/json, text/plain, */*",
-                                accessToken: `${cookie.value}`,
-                            },
-                            success: function (data) {
-                                console.log(data);
-                            },
-                            error: function (error) {
-                                console.log(error);
-                            }
-                        });
-                    }));
-                }
-            });
-            await sleep();
-            feeding = feedings.shift();
-        }
-    }
-};
-
+// 检查是否在白名单
+// setTimeout(LoginLoop, 0);
+// 检查是否登陆
 setTimeout(TransactionLoop, 0);
