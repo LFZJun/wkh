@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -91,7 +91,7 @@ const TRANSACTION = "/background/transaction";
 
 /***/ }),
 
-/***/ 12:
+/***/ 14:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -114,14 +114,14 @@ router.use(ctx => {
 });
 
 router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["a" /* ALERT */], ctx => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         alert(ctx.request.alert);
         resolve();
     });
 });
 
 router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["c" /* HOME */], ctx => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         $("div").forEach(element => {
             let element$ = $(element);
 
@@ -178,12 +178,12 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["c" /* HOME */], ctx => {
 
 //market
 router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* MARKET */], ctx => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         $("div").forEach(element => {
             let element$ = $(element);
 
             if (element$.hasClass(ITEM)) {
-                let info = $(element$.find(".info p").get(1)).text();
+                let info = $(element$.find(".info")).text();
                 let priceDiv = element$.find(".price span").first();
                 let price = $(element$.find(".price span").get(0)).text();
                 let gen = element$.find(".gen").text().replace("代", "");
@@ -228,8 +228,8 @@ const ShowScore = function (element$) {
         console.log("匹配不到 代数 和 体重");
         return
     }
-    const ps = element$.find(".info p");
-    if (ps.length < 2) {
+    const ps = element$.find(".info");
+    if (ps.length < 1) {
         console.log("找不到猴子 属性");
         return
     }

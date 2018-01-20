@@ -20,6 +20,7 @@
   "dependencies": {
     "@types/chrome": "^0.0.57",
     "@types/zepto": "^1.0.29",
-    "axios": "^0.17.1"
+    "axios": "^0.17.1",
+    "qs": "^6.5.1"
   }
 }

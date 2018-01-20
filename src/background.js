@@ -1,17 +1,38 @@
 import Axios from "axios"
+import qs from 'qs';
 import { ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE } from "./consts";
 import { FeedingCenter } from "./feed";
+import { action, ADD, newHeaderHandler } from "./header";
 import { Router } from "./router";
-import { getToken, sleep } from "./utils";
+import { sleep, whiteList } from "./utils";
 
 console.log("background");
 
 const feedingCenter = new FeedingCenter();
 const router = new Router();
 const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
-let globalMonkeyID = "";
+const headerHandler = newHeaderHandler();
 let login = false;
 let token = "";
+chrome.storage.sync.get({token: ""}, (result) => {
+    token = result.token;
+});
+
+headerHandler.handlers.push({
+    name: "Origin", callback: (header) => {
+        header.value = "http://h.miguan.in";
+    }
+});
+
+headerHandler.handlers.push({
+    name: "accessToken",
+    callback: header => {
+        if (header.value !== "") {
+            token = header.value;
+            chrome.storage.sync.set({token: token});
+        }
+    }
+});
 
 router.handle(TRANSACTION, ctx => {
     return new Promise((resolve) => {
@@ -39,11 +60,19 @@ router.run();
  */
 chrome.webRequest.onCompleted.addListener(
     function () {
-        if (!login) {
+        if (token === "") {
+            console.log("token 为空");
             return
         }
-        chrome.tabs.query({active: true}, function (tabs) {
+        chrome.tabs.query({active: true}, tabs => {
             const tab = tabs[0];
+            if (!login) {
+                chrome.tabs.sendMessage(tab.id, {
+                    path: ALERT,
+                    alert: "需要加入白名单"
+                });
+                return
+            }
             let path = null;
             if (tab.url === "http://h.miguan.in/home") {
                 path = HOME;
@@ -57,28 +86,16 @@ chrome.webRequest.onCompleted.addListener(
                 "min": 0.1,
                 "kg": false,
                 "coin": 0
-            }, function (result) {
-                if (result.coin === 0) {
+            }, result => {
+                if (result.coin === 0 || result.coin === "") {
                     chrome.tabs.sendMessage(tab.id, {
                         path: ALERT,
                         alert: "请填写单次玩客币数量"
                     });
                     return
                 }
-                // whiteList().then(response => {
-                // const roll = response.data;
-                // if (roll.indexOf(`0x${result.wallet.address}`) === -1) {
-                //     chrome.tabs.sendMessage(tab.id, {
-                //         path: ALERT,
-                //         alert: "需要加入白名单"
-                //     });
-                //     return
-                // }
                 result.path = path;
-                chrome.tabs.sendMessage(tab.id, result, function (response) {
-                    console.log(response);
-                });
-                // });
+                chrome.tabs.sendMessage(tab.id, result);
             })
         });
         return true;
@@ -101,22 +118,17 @@ const TransactionLoop = async () => {
             let monkeyID = feedings.monkeyID;
             Axios({
                 url: FeedingUrl,
-                method: 'options',
-            }).then(() => {
-                return getToken();
-            }).then((token) => {
-                return Axios({
-                    url: FeedingUrl,
-                    method: 'post',
-                    data: {
-                        coin: coin,
-                        monkeyId: monkeyID
-                    },
-                    headers: {
-                        'Accept': "application/json, text/plain, */*",
-                        'accessToken': token,
-                    },
-                });
+                method: 'post',
+                data: qs.stringify({
+                    coin: coin,
+                    monkeyId: monkeyID
+                }),
+                headers: {
+                    'Accept': "application/json, text/plain, */*",
+                    'accessToken': token,
+                    [`${action(ADD)}Referer`]: `http://h.miguan.in/monkey/${monkeyID}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             }).then((response) => {
                 console.log(response)
             });
@@ -127,43 +139,41 @@ const TransactionLoop = async () => {
 };
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
-    for (let n in details.requestHeaders) {
-        const name = details.requestHeaders[n].name;
-        if (name === "accessToken") {
-            token = details.requestHeaders[n].value;
-        }
-    }
-    console.log(details.requestHeaders);
-    return {requestHeaders: details.requestHeaders};
+    return {requestHeaders: headerHandler.build(details.requestHeaders)};
 }, {urls: ["http://api.h.miguan.in/*"]}, ["blocking", "requestHeaders"]);
 
-chrome.webRequest.onBeforeSendHeaders.addListener(details => {
-    let count = 0;
-    for (let n in details.requestHeaders) {
-        const name = details.requestHeaders[n].name;
-        if (name === "Origin") {
-            details.requestHeaders[n].value = "http://h.miguan.in";
-        } else if (name === "accessToken") {
-            count++;
-        } else if (name === "Access-Control-Request-Method") {
-            count++;
+const LoginLoop = () => {
+    if (token === "") {
+        console.log("token 为空");
+        return
+    }
+    let otc = "";
+    Axios({
+        url: "http://api.h.miguan.in/game/myCenter",
+        headers: {
+            accessToken: token,
+            [`${action(ADD)}X-Requested-With`]: 'XMLHttpRequest',
+            [`${action(ADD)}Referer`]: 'http://h.miguan.in/mine'
         }
-    }
-    if (count === 0) {
-        details.requestHeaders.push({name: "Referer", value: `http://h.miguan.in/monkey/${globalMonkeyID}`});
-    } else if (count === 1) {
-        details.requestHeaders.push({name: "Access-Control-Request-Headers", value: "accesstoken,x-requested-with"});
-        details.requestHeaders.push({name: "Access-Control-Request-Method", value: "POST"});
-        details.requestHeaders.push({name: "Referer", value: "http://h.miguan.in/monkey/"})
-    }
-    return {requestHeaders: details.requestHeaders};
-}, {urls: [FeedingUrl]}, ["blocking", "requestHeaders"]);
-
-// const LoginLoop = async () => {
-//
-// };
+    }).then(response => {
+        let data = response.data;
+        if (data.msg !== "操作成功") {
+            return
+        }
+        otc = data.result.otc;
+        return whiteList()
+    }).then(response => {
+        let data = response.data;
+        if (data.indexOf(otc) !== -1) {
+            login = true;
+        } else {
+            login = false;
+        }
+    });
+};
 
 // 检查是否在白名单
-// setTimeout(LoginLoop, 0);
+setInterval(LoginLoop, 15000);
 // 检查是否登陆
 setTimeout(TransactionLoop, 0);
+setTimeout(LoginLoop, 0);
