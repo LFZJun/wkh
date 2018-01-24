@@ -379,22 +379,28 @@ module.exports = {
 
 "use strict";
 const FULL = "full";
-/* harmony export (immutable) */ __webpack_exports__["b"] = FULL;
+/* harmony export (immutable) */ __webpack_exports__["c"] = FULL;
 
 const VALUE = "value";
-/* harmony export (immutable) */ __webpack_exports__["f"] = VALUE;
+/* harmony export (immutable) */ __webpack_exports__["h"] = VALUE;
 
 const HOME = "/inject/home";
-/* harmony export (immutable) */ __webpack_exports__["c"] = HOME;
+/* harmony export (immutable) */ __webpack_exports__["d"] = HOME;
 
 const MARKET = "/inject/market";
-/* harmony export (immutable) */ __webpack_exports__["d"] = MARKET;
+/* harmony export (immutable) */ __webpack_exports__["e"] = MARKET;
 
 const ALERT = "/inject/alert";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ALERT;
 
 const TRANSACTION = "/background/transaction";
-/* harmony export (immutable) */ __webpack_exports__["e"] = TRANSACTION;
+/* harmony export (immutable) */ __webpack_exports__["g"] = TRANSACTION;
+
+const Origin = "monkey.plus";
+/* harmony export (immutable) */ __webpack_exports__["f"] = Origin;
+
+const APIOrigin = `api.0.${Origin}`;
+/* harmony export (immutable) */ __webpack_exports__["b"] = APIOrigin;
 
 
 
@@ -1335,19 +1341,22 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 console.log("background");
 
+const FeedingUrl = `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/game/balanceFeed`;
+
 const feedingCenter = new __WEBPACK_IMPORTED_MODULE_3__feed__["a" /* FeedingCenter */]();
 const router = new __WEBPACK_IMPORTED_MODULE_5__router__["a" /* Router */]();
-const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
 const headerHandler = Object(__WEBPACK_IMPORTED_MODULE_4__header__["c" /* newHeaderHandler */])();
+
 let login = false;
 let token = "";
+
 chrome.storage.sync.get({token: ""}, (result) => {
     token = result.token;
 });
 
 headerHandler.handlers.push({
     name: "Origin", callback: (header) => {
-        header.value = "http://h.miguan.in";
+        header.value = `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}`;
     }
 });
 
@@ -1361,7 +1370,7 @@ headerHandler.handlers.push({
     }
 });
 
-router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["e" /* TRANSACTION */], ctx => {
+router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["g" /* TRANSACTION */], ctx => {
     return new Promise((resolve) => {
         chrome.storage.sync.get({
             "wallet": null,
@@ -1370,7 +1379,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["e" /* TRANSACTION */], ctx 
             let {request} = ctx;
             const {mode, feeding, limit, id} = request;
             const {coin} = result;
-            if (mode === __WEBPACK_IMPORTED_MODULE_2__consts__["b" /* FULL */]) {
+            if (mode === __WEBPACK_IMPORTED_MODULE_2__consts__["c" /* FULL */]) {
                 console.log(`需要喂养${feedingCenter.fullyFeeds(id, feeding, limit, coin)}次`);
                 console.log(feedingCenter);
             } else {
@@ -1401,15 +1410,15 @@ chrome.webRequest.onCompleted.addListener(
                 return
             }
             let path = null;
-            if (tab.url === "http://h.miguan.in/home") {
-                path = __WEBPACK_IMPORTED_MODULE_2__consts__["c" /* HOME */];
-            } else if (tab.url.indexOf("http://h.miguan.in/market") !== -1) {
-                path = __WEBPACK_IMPORTED_MODULE_2__consts__["d" /* MARKET */];
+            if (tab.url === `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/home`) {
+                path = __WEBPACK_IMPORTED_MODULE_2__consts__["d" /* HOME */];
+            } else if (tab.url.indexOf(`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/market`) !== -1) {
+                path = __WEBPACK_IMPORTED_MODULE_2__consts__["e" /* MARKET */];
             } else {
                 return
             }
             chrome.storage.sync.get({
-                "mode": __WEBPACK_IMPORTED_MODULE_2__consts__["f" /* VALUE */],
+                "mode": __WEBPACK_IMPORTED_MODULE_2__consts__["h" /* VALUE */],
                 "min": 0.1,
                 "kg": false,
                 "coin": 0
@@ -1427,7 +1436,7 @@ chrome.webRequest.onCompleted.addListener(
         });
         return true;
     },
-    {urls: ["http://api.h.miguan.in/*"]}
+    {urls: [`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/*`]}
 );
 
 const TransactionLoop = async () => {
@@ -1453,7 +1462,7 @@ const TransactionLoop = async () => {
                 headers: {
                     'Accept': "application/json, text/plain, */*",
                     'accessToken': token,
-                    [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: `http://h.miguan.in/monkey/${monkeyID}`,
+                    [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/monkey/${monkeyID}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
@@ -1467,7 +1476,7 @@ const TransactionLoop = async () => {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
     return {requestHeaders: headerHandler.build(details.requestHeaders)};
-}, {urls: ["http://api.h.miguan.in/*"]}, ["blocking", "requestHeaders"]);
+}, {urls: [`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/*`]}, ["blocking", "requestHeaders"]);
 
 const LoginLoop = () => {
     if (token === "") {
@@ -1476,11 +1485,11 @@ const LoginLoop = () => {
     }
     let otc = "";
     __WEBPACK_IMPORTED_MODULE_0_axios___default()({
-        url: "http://api.h.miguan.in/game/myCenter",
+        url: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/game/myCenter`,
         headers: {
             accessToken: token,
             [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}X-Requested-With`]: 'XMLHttpRequest',
-            [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: 'http://h.miguan.in/mine'
+            [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/mine`
         }
     }).then(response => {
         let data = response.data;
@@ -1491,11 +1500,7 @@ const LoginLoop = () => {
         return Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* whiteList */])()
     }).then(response => {
         let data = response.data;
-        if (data.indexOf(otc) !== -1) {
-            login = true;
-        } else {
-            login = false;
-        }
+        login = data.indexOf(otc) !== -1;
     });
 };
 
@@ -2962,6 +2967,8 @@ function newHeaderHandler() {
 /* unused harmony export getToken */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__consts__ = __webpack_require__(1);
+
 
 class Combination {
     constructor(list = [], sum = 0) {
@@ -3021,7 +3028,7 @@ function whiteList() {
 }
 function getToken() {
     return new Promise(resolve => {
-        chrome.cookies.get({ url: "http://api.h.miguan.in", name: "token" }, (cookie => {
+        chrome.cookies.get({ url: `http://${__WEBPACK_IMPORTED_MODULE_1__consts__["b" /* APIOrigin */]}`, name: "token" }, (cookie => {
             resolve(cookie === null ? null : cookie.value);
         }));
     });

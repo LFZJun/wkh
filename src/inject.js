@@ -91,8 +91,12 @@ router.handle(MARKET, ctx => {
                     return
                 }
                 let valueAndWeight = info.split('·');
-                let digValue = valueAndWeight[0].split('/')[1];
-                let weight = valueAndWeight[1].split(' ')[0].replace("kg", "");
+                let values = valueAndWeight[0].split('/');
+                let digValue = values[1];
+                if (values.length === 3) {
+                    digValue = values[2];
+                }
+                let weight = valueAndWeight[1].replace("kg", "");
                 let wkc = price.split(' ')[0];
                 let span = $(element$.find(".price").find(".price span").get(0));
                 if (span.text().indexOf(";") !== -1) {

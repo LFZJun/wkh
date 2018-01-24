@@ -1,5 +1,6 @@
 import Axios, {AxiosPromise} from "axios";
-import Cookie = chrome.cookies.Cookie;
+import {APIOrigin} from "./consts";
+
 
 class Combination {
     list: string[];
@@ -66,7 +67,7 @@ export function whiteList(): AxiosPromise<any> {
 
 export function getToken(): Promise<string | null> {
     return new Promise(resolve => {
-        chrome.cookies.get({url: "http://api.h.miguan.in", name: "token"}, (cookie => {
+        chrome.cookies.get({url: `http://${APIOrigin}`, name: "token"}, (cookie => {
             resolve(cookie === null ? null : cookie.value);
         }));
     });

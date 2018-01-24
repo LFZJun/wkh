@@ -10,9 +10,8 @@
         "default_popup": "public/popup.html"
     },
     "permissions": [
-        "*://h.miguan.in/*",
-        "*://api.h.miguan.in/*",
-        "https://walletapi.onethingpcs.com/",
+        "*://monkey.plus/*",
+        "*://api.0.monkey.plus/*",
         "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
         "tabs",
         "activeTab",
@@ -25,7 +24,7 @@
     "content_scripts": [
         {
             "matches": [
-                "*://h.miguan.in/*"
+                "*://monkey.plus/*"
             ],
             "css": [],
             "js": [

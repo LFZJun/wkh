@@ -1,26 +1,29 @@
 import Axios from "axios"
 import qs from 'qs';
-import { ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE } from "./consts";
-import { FeedingCenter } from "./feed";
-import { action, ADD, newHeaderHandler } from "./header";
-import { Router } from "./router";
-import { sleep, whiteList } from "./utils";
+import {ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE, Origin, APIOrigin} from "./consts";
+import {FeedingCenter} from "./feed";
+import {action, ADD, newHeaderHandler} from "./header";
+import {Router} from "./router";
+import {sleep, whiteList} from "./utils";
 
 console.log("background");
 
+const FeedingUrl = `http://${APIOrigin}/game/balanceFeed`;
+
 const feedingCenter = new FeedingCenter();
 const router = new Router();
-const FeedingUrl = "http://api.h.miguan.in/game/balanceFeed";
 const headerHandler = newHeaderHandler();
+
 let login = false;
 let token = "";
+
 chrome.storage.sync.get({token: ""}, (result) => {
     token = result.token;
 });
 
 headerHandler.handlers.push({
     name: "Origin", callback: (header) => {
-        header.value = "http://h.miguan.in";
+        header.value = `http://${Origin}`;
     }
 });
 
@@ -74,9 +77,9 @@ chrome.webRequest.onCompleted.addListener(
                 return
             }
             let path = null;
-            if (tab.url === "http://h.miguan.in/home") {
+            if (tab.url === `http://${Origin}/home`) {
                 path = HOME;
-            } else if (tab.url.indexOf("http://h.miguan.in/market") !== -1) {
+            } else if (tab.url.indexOf(`http://${Origin}/market`) !== -1) {
                 path = MARKET;
             } else {
                 return
@@ -100,7 +103,7 @@ chrome.webRequest.onCompleted.addListener(
         });
         return true;
     },
-    {urls: ["http://api.h.miguan.in/*"]}
+    {urls: [`http://${APIOrigin}/*`]}
 );
 
 const TransactionLoop = async () => {
@@ -126,7 +129,7 @@ const TransactionLoop = async () => {
                 headers: {
                     'Accept': "application/json, text/plain, */*",
                     'accessToken': token,
-                    [`${action(ADD)}Referer`]: `http://h.miguan.in/monkey/${monkeyID}`,
+                    [`${action(ADD)}Referer`]: `http://${Origin}/monkey/${monkeyID}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
@@ -140,7 +143,7 @@ const TransactionLoop = async () => {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
     return {requestHeaders: headerHandler.build(details.requestHeaders)};
-}, {urls: ["http://api.h.miguan.in/*"]}, ["blocking", "requestHeaders"]);
+}, {urls: [`http://${APIOrigin}/*`]}, ["blocking", "requestHeaders"]);
 
 const LoginLoop = () => {
     if (token === "") {
@@ -149,11 +152,11 @@ const LoginLoop = () => {
     }
     let otc = "";
     Axios({
-        url: "http://api.h.miguan.in/game/myCenter",
+        url: `http://${APIOrigin}/game/myCenter`,
         headers: {
             accessToken: token,
             [`${action(ADD)}X-Requested-With`]: 'XMLHttpRequest',
-            [`${action(ADD)}Referer`]: 'http://h.miguan.in/mine'
+            [`${action(ADD)}Referer`]: `http://${Origin}/mine`
         }
     }).then(response => {
         let data = response.data;
@@ -164,11 +167,7 @@ const LoginLoop = () => {
         return whiteList()
     }).then(response => {
         let data = response.data;
-        if (data.indexOf(otc) !== -1) {
-            login = true;
-        } else {
-            login = false;
-        }
+        login = data.indexOf(otc) !== -1;
     });
 };
 

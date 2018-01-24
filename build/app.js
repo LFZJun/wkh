@@ -70,22 +70,28 @@
 
 "use strict";
 const FULL = "full";
-/* harmony export (immutable) */ __webpack_exports__["b"] = FULL;
+/* harmony export (immutable) */ __webpack_exports__["c"] = FULL;
 
 const VALUE = "value";
-/* harmony export (immutable) */ __webpack_exports__["f"] = VALUE;
+/* harmony export (immutable) */ __webpack_exports__["h"] = VALUE;
 
 const HOME = "/inject/home";
-/* harmony export (immutable) */ __webpack_exports__["c"] = HOME;
+/* harmony export (immutable) */ __webpack_exports__["d"] = HOME;
 
 const MARKET = "/inject/market";
-/* harmony export (immutable) */ __webpack_exports__["d"] = MARKET;
+/* harmony export (immutable) */ __webpack_exports__["e"] = MARKET;
 
 const ALERT = "/inject/alert";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ALERT;
 
 const TRANSACTION = "/background/transaction";
-/* harmony export (immutable) */ __webpack_exports__["e"] = TRANSACTION;
+/* harmony export (immutable) */ __webpack_exports__["g"] = TRANSACTION;
+
+const Origin = "monkey.plus";
+/* harmony export (immutable) */ __webpack_exports__["f"] = Origin;
+
+const APIOrigin = `api.0.${Origin}`;
+/* harmony export (immutable) */ __webpack_exports__["b"] = APIOrigin;
 
 
 
@@ -106,7 +112,7 @@ const kg = 'kg';
 const coin = 'coin';
 
 chrome.storage.sync.get({
-    [mode]: __WEBPACK_IMPORTED_MODULE_0__consts__["f" /* VALUE */],
+    [mode]: __WEBPACK_IMPORTED_MODULE_0__consts__["h" /* VALUE */],
     [min]: 0.1,
     [kg]: false,
     [interval]: 5,
