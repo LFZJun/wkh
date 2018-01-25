@@ -379,28 +379,22 @@ module.exports = {
 
 "use strict";
 const FULL = "full";
-/* harmony export (immutable) */ __webpack_exports__["c"] = FULL;
+/* harmony export (immutable) */ __webpack_exports__["b"] = FULL;
 
 const VALUE = "value";
-/* harmony export (immutable) */ __webpack_exports__["h"] = VALUE;
+/* harmony export (immutable) */ __webpack_exports__["f"] = VALUE;
 
 const HOME = "/inject/home";
-/* harmony export (immutable) */ __webpack_exports__["d"] = HOME;
+/* harmony export (immutable) */ __webpack_exports__["c"] = HOME;
 
 const MARKET = "/inject/market";
-/* harmony export (immutable) */ __webpack_exports__["e"] = MARKET;
+/* harmony export (immutable) */ __webpack_exports__["d"] = MARKET;
 
 const ALERT = "/inject/alert";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ALERT;
 
 const TRANSACTION = "/background/transaction";
-/* harmony export (immutable) */ __webpack_exports__["g"] = TRANSACTION;
-
-const Origin = "monkey.plus";
-/* harmony export (immutable) */ __webpack_exports__["f"] = Origin;
-
-const APIOrigin = `api.0.${Origin}`;
-/* harmony export (immutable) */ __webpack_exports__["b"] = APIOrigin;
+/* harmony export (immutable) */ __webpack_exports__["e"] = TRANSACTION;
 
 
 
@@ -1327,10 +1321,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_qs__ = __webpack_require__(34);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_qs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_qs__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__consts__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__feed__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__header__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__router__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__header__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__feed__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__router__ = __webpack_require__(2);
+
 
 
 
@@ -1341,23 +1336,19 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 console.log("background");
 
-const FeedingUrl = `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/game/balanceFeed`;
+const Origin = "0.monkey.plus";
+const APIOrigin = `api.${Origin}`;
+const FeedingUrl = `http://${APIOrigin}/game/balanceFeed`;
 
-const feedingCenter = new __WEBPACK_IMPORTED_MODULE_3__feed__["a" /* FeedingCenter */]();
-const router = new __WEBPACK_IMPORTED_MODULE_5__router__["a" /* Router */]();
-const headerHandler = Object(__WEBPACK_IMPORTED_MODULE_4__header__["c" /* newHeaderHandler */])();
+const feedingCenter = new __WEBPACK_IMPORTED_MODULE_5__feed__["a" /* FeedingCenter */]();
+const headerHandler = Object(__WEBPACK_IMPORTED_MODULE_3__header__["d" /* newHeaderHandler */])();
+const router = new __WEBPACK_IMPORTED_MODULE_6__router__["a" /* Router */]();
 
 let login = false;
 let token = "";
 
 chrome.storage.sync.get({token: ""}, (result) => {
     token = result.token;
-});
-
-headerHandler.handlers.push({
-    name: "Origin", callback: (header) => {
-        header.value = `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}`;
-    }
 });
 
 headerHandler.handlers.push({
@@ -1370,7 +1361,7 @@ headerHandler.handlers.push({
     }
 });
 
-router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["g" /* TRANSACTION */], ctx => {
+router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["e" /* TRANSACTION */], ctx => {
     return new Promise((resolve) => {
         chrome.storage.sync.get({
             "wallet": null,
@@ -1379,7 +1370,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_2__consts__["g" /* TRANSACTION */], ctx 
             let {request} = ctx;
             const {mode, feeding, limit, id} = request;
             const {coin} = result;
-            if (mode === __WEBPACK_IMPORTED_MODULE_2__consts__["c" /* FULL */]) {
+            if (mode === __WEBPACK_IMPORTED_MODULE_2__consts__["b" /* FULL */]) {
                 console.log(`需要喂养${feedingCenter.fullyFeeds(id, feeding, limit, coin)}次`);
                 console.log(feedingCenter);
             } else {
@@ -1410,15 +1401,15 @@ chrome.webRequest.onCompleted.addListener(
                 return
             }
             let path = null;
-            if (tab.url === `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/home`) {
-                path = __WEBPACK_IMPORTED_MODULE_2__consts__["d" /* HOME */];
-            } else if (tab.url.indexOf(`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/market`) !== -1) {
-                path = __WEBPACK_IMPORTED_MODULE_2__consts__["e" /* MARKET */];
+            if (tab.url === `http://${Origin}/home`) {
+                path = __WEBPACK_IMPORTED_MODULE_2__consts__["c" /* HOME */];
+            } else if (tab.url.indexOf(`http://${Origin}/market`) !== -1) {
+                path = __WEBPACK_IMPORTED_MODULE_2__consts__["d" /* MARKET */];
             } else {
                 return
             }
             chrome.storage.sync.get({
-                "mode": __WEBPACK_IMPORTED_MODULE_2__consts__["h" /* VALUE */],
+                "mode": __WEBPACK_IMPORTED_MODULE_2__consts__["f" /* VALUE */],
                 "min": 0.1,
                 "kg": false,
                 "coin": 0
@@ -1436,7 +1427,7 @@ chrome.webRequest.onCompleted.addListener(
         });
         return true;
     },
-    {urls: [`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/*`]}
+    {urls: [`http://${APIOrigin}/*`]}
 );
 
 const TransactionLoop = async () => {
@@ -1444,7 +1435,7 @@ const TransactionLoop = async () => {
     while (true) {
         let feedings = feedingCenter.back();
         if (feedings === undefined) {
-            await Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sleep */])();
+            await Object(__WEBPACK_IMPORTED_MODULE_4__utils__["a" /* sleep */])();
             console.log("TransactionLoop idle");
             continue;
         }
@@ -1462,13 +1453,14 @@ const TransactionLoop = async () => {
                 headers: {
                     'Accept': "application/json, text/plain, */*",
                     'accessToken': token,
-                    [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/monkey/${monkeyID}`,
+                    [`${Object(__WEBPACK_IMPORTED_MODULE_3__header__["c" /* action */])(__WEBPACK_IMPORTED_MODULE_3__header__["a" /* ADD */])}Referer`]: `http://${Origin}/monkey/${monkeyID}`,
+                    [`${Object(__WEBPACK_IMPORTED_MODULE_3__header__["c" /* action */])(__WEBPACK_IMPORTED_MODULE_3__header__["b" /* REP */])}Origin`]: `http://${Origin}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {
                 console.log(response)
             });
-            await Object(__WEBPACK_IMPORTED_MODULE_6__utils__["a" /* sleep */])();
+            await Object(__WEBPACK_IMPORTED_MODULE_4__utils__["a" /* sleep */])();
             feeding = feedings.shift();
         }
     }
@@ -1476,7 +1468,7 @@ const TransactionLoop = async () => {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(details => {
     return {requestHeaders: headerHandler.build(details.requestHeaders)};
-}, {urls: [`http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/*`]}, ["blocking", "requestHeaders"]);
+}, {urls: [`http://${APIOrigin}/*`]}, ["blocking", "requestHeaders"]);
 
 const LoginLoop = () => {
     if (token === "") {
@@ -1485,11 +1477,11 @@ const LoginLoop = () => {
     }
     let otc = "";
     __WEBPACK_IMPORTED_MODULE_0_axios___default()({
-        url: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["b" /* APIOrigin */]}/game/myCenter`,
+        url: `http://${APIOrigin}/game/myCenter`,
         headers: {
             accessToken: token,
-            [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}X-Requested-With`]: 'XMLHttpRequest',
-            [`${Object(__WEBPACK_IMPORTED_MODULE_4__header__["b" /* action */])(__WEBPACK_IMPORTED_MODULE_4__header__["a" /* ADD */])}Referer`]: `http://${__WEBPACK_IMPORTED_MODULE_2__consts__["f" /* Origin */]}/mine`
+            [`${Object(__WEBPACK_IMPORTED_MODULE_3__header__["c" /* action */])(__WEBPACK_IMPORTED_MODULE_3__header__["a" /* ADD */])}X-Requested-With`]: 'XMLHttpRequest',
+            [`${Object(__WEBPACK_IMPORTED_MODULE_3__header__["c" /* action */])(__WEBPACK_IMPORTED_MODULE_3__header__["a" /* ADD */])}Referer`]: `http://${Origin}/mine`
         }
     }).then(response => {
         let data = response.data;
@@ -1497,7 +1489,7 @@ const LoginLoop = () => {
             return
         }
         otc = data.result.otc;
-        return Object(__WEBPACK_IMPORTED_MODULE_6__utils__["b" /* whiteList */])()
+        return Object(__WEBPACK_IMPORTED_MODULE_4__utils__["b" /* whiteList */])()
     }).then(response => {
         let data = response.data;
         login = data.indexOf(otc) !== -1;
@@ -2815,6 +2807,151 @@ module.exports = function (str, opts) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["c"] = action;
+/* harmony export (immutable) */ __webpack_exports__["d"] = newHeaderHandler;
+class HeaderHandler {
+    constructor(handlers = [], fuckHandlers = {}) {
+        this.handlers = handlers;
+        this.fuckHandlers = fuckHandlers;
+    }
+    build(headers) {
+        let remove = [];
+        let filters = this.handlers.slice();
+        for (let index in headers) {
+            let header = headers[index];
+            let { name } = header;
+            // fuck_add_{name}: {value}
+            if (name.startsWith("Fuck-")) {
+                remove.splice(0, 0, Number(index));
+                name = name.slice(5);
+                let delimiter = name.indexOf("-");
+                let handlerName = name.slice(0, delimiter);
+                let handler = this.fuckHandlers[handlerName];
+                if (handler == undefined) {
+                    continue;
+                }
+                handler(headers, name.slice(delimiter + 1), header.value);
+                continue;
+            }
+            // replace
+            for (let i in filters) {
+                let filter = filters[i];
+                if (filter.name === header.name) {
+                    filter.callback(header);
+                    filters.splice(Number(i), 1);
+                    break;
+                }
+            }
+        }
+        // remove
+        for (let i of remove) {
+            headers.splice(i, 1);
+        }
+        return headers;
+    }
+}
+/* unused harmony export HeaderHandler */
+
+const ADD = "Add";
+/* harmony export (immutable) */ __webpack_exports__["a"] = ADD;
+
+const REP = "Rep";
+/* harmony export (immutable) */ __webpack_exports__["b"] = REP;
+
+function action(ac) {
+    return `Fuck-${ac}-`;
+}
+function newHeaderHandler() {
+    let headerHandler = new HeaderHandler();
+    headerHandler.fuckHandlers[ADD] = (headers, key, value) => {
+        headers.push({ name: key, value: value });
+    };
+    headerHandler.fuckHandlers[REP] = (headers, key, value) => {
+        for (let i in headers) {
+            if (headers[i].name === key) {
+                headers[i].value = value;
+                return;
+            }
+        }
+    };
+    return headerHandler;
+}
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export bestFeeding */
+/* harmony export (immutable) */ __webpack_exports__["a"] = sleep;
+/* harmony export (immutable) */ __webpack_exports__["b"] = whiteList;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
+
+class Combination {
+    constructor(list = [], sum = 0) {
+        this.list = list;
+        this.sum = sum;
+    }
+}
+function bestFeeding(limit, base) {
+    let cs = [];
+    let naiveBestFeeding = (newBase, p) => {
+        for (let i = newBase; i < limit; i++) {
+            let sum = p.sum + i;
+            if (sum > limit) {
+                if (p.list.length == 0 || p.sum + base < limit) {
+                    return;
+                }
+                if (cs.length == 0 || cs[0].sum == p.sum) {
+                    cs.push(new Combination(p.list, p.sum));
+                }
+                else if (cs[0].sum < p.sum) {
+                    cs = [new Combination(p.list, p.sum)];
+                }
+                return;
+            }
+            let slice = p.list.slice();
+            slice.push(`${i | 0}.${base.toString().slice(2)}`);
+            naiveBestFeeding(i, new Combination(slice, sum));
+        }
+    };
+    naiveBestFeeding(base, new Combination());
+    cs.sort(((a, b) => {
+        if (a.list.length < b.list.length) {
+            return -1;
+        }
+        if (a.list.length > b.list.length) {
+            return 1;
+        }
+        return 0;
+    }));
+    return cs;
+}
+function sleep() {
+    return new Promise(resolve => {
+        chrome.storage.sync.get({
+            "interval": 5,
+        }, (result) => {
+            const interval = result.interval < 1 ? 1000 : result.interval * 1000;
+            setTimeout(resolve, interval);
+        });
+    });
+}
+function whiteList() {
+    return __WEBPACK_IMPORTED_MODULE_0_axios___default()({
+        url: "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
+        method: 'get'
+    });
+}
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 class FeedingCenter {
     constructor(monkeys = {}) {
         this.monkeys = monkeys;
@@ -2889,150 +3026,6 @@ class Feeding {
 }
 /* unused harmony export Feeding */
 
-
-
-/***/ }),
-/* 38 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["b"] = action;
-/* harmony export (immutable) */ __webpack_exports__["c"] = newHeaderHandler;
-class HeaderHandler {
-    constructor(handlers = [], fuckHandlers = {}) {
-        this.handlers = handlers;
-        this.fuckHandlers = fuckHandlers;
-    }
-    build(headers) {
-        let remove = [];
-        let filters = this.handlers.slice();
-        for (let index in headers) {
-            let header = headers[index];
-            let { name } = header;
-            // fuck_add_{name}: {value}
-            if (name.startsWith("Fuck-")) {
-                remove.splice(0, 0, Number(index));
-                name = name.slice(5);
-                let delimiter = name.indexOf("-");
-                let handlerName = name.slice(0, delimiter);
-                let handler = this.fuckHandlers[handlerName];
-                if (handler == undefined) {
-                    continue;
-                }
-                handler(headers, name.slice(delimiter + 1), header.value);
-                continue;
-            }
-            // replace
-            for (let i in filters) {
-                let filter = filters[i];
-                if (filter.name === header.name) {
-                    filter.callback(header);
-                    filters.splice(Number(i), 1);
-                    break;
-                }
-            }
-        }
-        // remove
-        for (let i of remove) {
-            headers.splice(i, 1);
-        }
-        return headers;
-    }
-}
-/* unused harmony export HeaderHandler */
-
-const ADD = "Add";
-/* harmony export (immutable) */ __webpack_exports__["a"] = ADD;
-
-function action(ac) {
-    return `Fuck-${ac}-`;
-}
-function newHeaderHandler() {
-    let headerHandler = new HeaderHandler();
-    headerHandler.fuckHandlers[ADD] = (headers, key, value) => {
-        headers.push({ name: key, value: value });
-    };
-    return headerHandler;
-}
-
-
-/***/ }),
-/* 39 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export bestFeeding */
-/* harmony export (immutable) */ __webpack_exports__["a"] = sleep;
-/* harmony export (immutable) */ __webpack_exports__["b"] = whiteList;
-/* unused harmony export getToken */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__consts__ = __webpack_require__(1);
-
-
-class Combination {
-    constructor(list = [], sum = 0) {
-        this.list = list;
-        this.sum = sum;
-    }
-}
-function bestFeeding(limit, base) {
-    let cs = [];
-    let naiveBestFeeding = (newBase, p) => {
-        for (let i = newBase; i < limit; i++) {
-            let sum = p.sum + i;
-            if (sum > limit) {
-                if (p.list.length == 0 || p.sum + base < limit) {
-                    return;
-                }
-                if (cs.length == 0 || cs[0].sum == p.sum) {
-                    cs.push(new Combination(p.list, p.sum));
-                }
-                else if (cs[0].sum < p.sum) {
-                    cs = [new Combination(p.list, p.sum)];
-                }
-                return;
-            }
-            let slice = p.list.slice();
-            slice.push(`${i | 0}.${base.toString().slice(2)}`);
-            naiveBestFeeding(i, new Combination(slice, sum));
-        }
-    };
-    naiveBestFeeding(base, new Combination());
-    cs.sort(((a, b) => {
-        if (a.list.length < b.list.length) {
-            return -1;
-        }
-        if (a.list.length > b.list.length) {
-            return 1;
-        }
-        return 0;
-    }));
-    return cs;
-}
-function sleep() {
-    return new Promise(resolve => {
-        chrome.storage.sync.get({
-            "interval": 5,
-        }, (result) => {
-            const interval = result.interval < 1 ? 1000 : result.interval * 1000;
-            setTimeout(resolve, interval);
-        });
-    });
-}
-function whiteList() {
-    return __WEBPACK_IMPORTED_MODULE_0_axios___default()({
-        url: "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
-        method: 'get'
-    });
-}
-function getToken() {
-    return new Promise(resolve => {
-        chrome.cookies.get({ url: `http://${__WEBPACK_IMPORTED_MODULE_1__consts__["b" /* APIOrigin */]}`, name: "token" }, (cookie => {
-            resolve(cookie === null ? null : cookie.value);
-        }));
-    });
-}
 
 
 /***/ })

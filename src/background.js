@@ -1,30 +1,27 @@
 import Axios from "axios"
 import qs from 'qs';
-import {ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE, Origin, APIOrigin} from "./consts";
-import {FeedingCenter} from "./feed";
-import {action, ADD, newHeaderHandler} from "./header";
-import {Router} from "./router";
+
+import {ALERT, FULL, HOME, MARKET, TRANSACTION, VALUE} from "./consts";
+import {action, newHeaderHandler, ADD, REP} from "./header";
 import {sleep, whiteList} from "./utils";
+import {FeedingCenter} from "./feed";
+import {Router} from "./router";
 
 console.log("background");
 
+const Origin = "0.monkey.plus";
+const APIOrigin = `api.${Origin}`;
 const FeedingUrl = `http://${APIOrigin}/game/balanceFeed`;
 
 const feedingCenter = new FeedingCenter();
-const router = new Router();
 const headerHandler = newHeaderHandler();
+const router = new Router();
 
 let login = false;
 let token = "";
 
 chrome.storage.sync.get({token: ""}, (result) => {
     token = result.token;
-});
-
-headerHandler.handlers.push({
-    name: "Origin", callback: (header) => {
-        header.value = `http://${Origin}`;
-    }
 });
 
 headerHandler.handlers.push({
@@ -130,6 +127,7 @@ const TransactionLoop = async () => {
                     'Accept': "application/json, text/plain, */*",
                     'accessToken': token,
                     [`${action(ADD)}Referer`]: `http://${Origin}/monkey/${monkeyID}`,
+                    [`${action(REP)}Origin`]: `http://${Origin}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((response) => {

@@ -10,8 +10,7 @@
         "default_popup": "public/popup.html"
     },
     "permissions": [
-        "*://monkey.plus/*",
-        "*://api.0.monkey.plus/*",
+        "*://*.monkey.plus/*",
         "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
         "tabs",
         "activeTab",
@@ -24,7 +23,7 @@
     "content_scripts": [
         {
             "matches": [
-                "*://monkey.plus/*"
+                "*://*.monkey.plus/*"
             ],
             "css": [],
             "js": [

@@ -49,6 +49,7 @@ export class HeaderHandler {
 }
 
 export const ADD = "Add";
+export const REP = "Rep";
 
 export function action(ac: string): string {
     return `Fuck-${ac}-`;
@@ -58,6 +59,14 @@ export function newHeaderHandler() {
     let headerHandler = new HeaderHandler();
     headerHandler.fuckHandlers[ADD] = (headers: HttpHeader[], key: string, value: string) => {
         headers.push({name: key, value: value});
+    };
+    headerHandler.fuckHandlers[REP] = (headers: HttpHeader[], key: string, value: string) => {
+        for (let i in headers) {
+            if (headers[i].name === key) {
+                headers[i].value = value;
+                return
+            }
+        }
     };
     return headerHandler;
 }

@@ -1,5 +1,4 @@
 import Axios, {AxiosPromise} from "axios";
-import {APIOrigin} from "./consts";
 
 
 class Combination {
@@ -62,13 +61,5 @@ export function whiteList(): AxiosPromise<any> {
     return Axios({
         url: "http://mxz-upload-public.oss-cn-hangzhou.aliyuncs.com/wkh/whitelist.json",
         method: 'get'
-    });
-}
-
-export function getToken(): Promise<string | null> {
-    return new Promise(resolve => {
-        chrome.cookies.get({url: `http://${APIOrigin}`, name: "token"}, (cookie => {
-            resolve(cookie === null ? null : cookie.value);
-        }));
     });
 }

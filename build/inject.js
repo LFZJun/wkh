@@ -70,28 +70,22 @@
 
 "use strict";
 const FULL = "full";
-/* harmony export (immutable) */ __webpack_exports__["c"] = FULL;
+/* harmony export (immutable) */ __webpack_exports__["b"] = FULL;
 
 const VALUE = "value";
-/* harmony export (immutable) */ __webpack_exports__["h"] = VALUE;
+/* harmony export (immutable) */ __webpack_exports__["f"] = VALUE;
 
 const HOME = "/inject/home";
-/* harmony export (immutable) */ __webpack_exports__["d"] = HOME;
+/* harmony export (immutable) */ __webpack_exports__["c"] = HOME;
 
 const MARKET = "/inject/market";
-/* harmony export (immutable) */ __webpack_exports__["e"] = MARKET;
+/* harmony export (immutable) */ __webpack_exports__["d"] = MARKET;
 
 const ALERT = "/inject/alert";
 /* harmony export (immutable) */ __webpack_exports__["a"] = ALERT;
 
 const TRANSACTION = "/background/transaction";
-/* harmony export (immutable) */ __webpack_exports__["g"] = TRANSACTION;
-
-const Origin = "monkey.plus";
-/* harmony export (immutable) */ __webpack_exports__["f"] = Origin;
-
-const APIOrigin = `api.0.${Origin}`;
-/* harmony export (immutable) */ __webpack_exports__["b"] = APIOrigin;
+/* harmony export (immutable) */ __webpack_exports__["e"] = TRANSACTION;
 
 
 
@@ -126,7 +120,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["a" /* ALERT */], ctx => 
     });
 });
 
-router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* HOME */], ctx => {
+router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["c" /* HOME */], ctx => {
     return new Promise((resolve) => {
         $("div").forEach(element => {
             let element$ = $(element);
@@ -140,7 +134,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* HOME */], ctx => {
 
                     btns.push({
                         button: $('<button style="margin:1px;border-color:red;">喂饱</button>'),
-                        mode: __WEBPACK_IMPORTED_MODULE_1__consts_ts__["c" /* FULL */]
+                        mode: __WEBPACK_IMPORTED_MODULE_1__consts_ts__["b" /* FULL */]
                     });
                     let percent = elementMonkey.find(".percent").first().text();
                     let doFeed = function (self, mode) {
@@ -155,7 +149,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* HOME */], ctx => {
                             btn.button.hide()
                         });
                         chrome.runtime.sendMessage({
-                            path: __WEBPACK_IMPORTED_MODULE_1__consts_ts__["g" /* TRANSACTION */],
+                            path: __WEBPACK_IMPORTED_MODULE_1__consts_ts__["e" /* TRANSACTION */],
                             id: elementMonkey.find(".id").first().text().split(' ')[1],
                             feeding: Number(percent.split('/')[0]),
                             limit: Number(percent.split('/')[1]),
@@ -183,7 +177,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* HOME */], ctx => {
 
 
 //market
-router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["e" /* MARKET */], ctx => {
+router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["d" /* MARKET */], ctx => {
     return new Promise((resolve) => {
         $("div").forEach(element => {
             let element$ = $(element);
@@ -210,7 +204,7 @@ router.handle(__WEBPACK_IMPORTED_MODULE_1__consts_ts__["e" /* MARKET */], ctx =>
                 }
                 let request = ctx.request;
                 let mark = Number(digValue) * (request.kg === "true" ? Number(weight) : 1) / GenerationFactor(gen);
-                let showMark = request.mode === __WEBPACK_IMPORTED_MODULE_1__consts_ts__["h" /* VALUE */] ? mark : mark / Number(wkc);
+                let showMark = request.mode === __WEBPACK_IMPORTED_MODULE_1__consts_ts__["f" /* VALUE */] ? mark : mark / Number(wkc);
                 span.text(`${wkc} 掘金价值:${(showMark).toFixed(5)}`);
                 if (showMark >= request.min) {
                     element$.prop("style", "background:rgb(201,199,157);")
